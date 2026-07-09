@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0b0e14">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Daily Brief</title>
+<style>
+  :root{
+    --bg:#0b0e14; --bg2:#111623; --card:#151b2b; --card2:#1a2234;
+    --line:#232c42; --txt:#e8ecf5; --muted:#93a0bd; --dim:#67728f;
+    --world:#3b82f6; --auto:#f97316; --mkt:#22c55e;
+    --accent:var(--world);
+    --radius:18px;
+    font-size:16px;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0; padding:0;}
+  body{
+    background:radial-gradient(1200px 600px at 50% -10%, #16203a 0%, var(--bg) 55%) fixed;
+    color:var(--txt);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    padding-bottom:96px;
+    min-height:100vh;
+  }
+  a{color:inherit; text-decoration:none;}
+
+  /* Header */
+  header{
+    position:sticky; top:0; z-index:50;
+    padding:calc(env(safe-area-inset-top) + 14px) 18px 12px;
+    background:linear-gradient(180deg, rgba(11,14,20,.96), rgba(11,14,20,.82) 70%, rgba(11,14,20,0));
+    backdrop-filter:blur(14px);
+  }
+  .brandrow{display:flex; align-items:center; justify-content:space-between; gap:12px;}
+  .brand{display:flex; align-items:center; gap:10px; font-weight:800; letter-spacing:-.02em; font-size:1.28rem;}
+  .brand .dot{width:11px; height:11px; border-radius:50%; background:var(--accent);
+    box-shadow:0 0 0 4px color-mix(in srgb, var(--accent) 25%, transparent); transition:.3s;}
+  .updated{font-size:.72rem; color:var(--dim); text-align:right; line-height:1.35;}
+  .updated b{color:var(--muted); font-weight:600;}
+
+  /* Tabs */
+  nav.tabs{display:flex; gap:6px; margin-top:14px; background:var(--bg2);
+    padding:5px; border-radius:14px; border:1px solid var(--line);}
+  nav.tabs button{
+    flex:1; border:0; background:transparent; color:var(--muted);
+    font-size:.86rem; font-weight:700; padding:10px 6px; border-radius:10px;
+    display:flex; align-items:center; justify-content:center; gap:7px; cursor:pointer;
+    transition:.2s; font-family:inherit;
+  }
+  nav.tabs button .ic{font-size:1rem;}
+  nav.tabs button.active{background:var(--card2); color:var(--txt);
+    box-shadow:0 2px 10px rgba(0,0,0,.35); }
+  nav.tabs button.active[data-k="world"]{color:#bfd4ff;}
+  nav.tabs button.active[data-k="auto"]{color:#ffd0a8;}
+  nav.tabs button.active[data-k="mkt"]{color:#a8f0c6;}
+
+  main{padding:6px 16px 0; max-width:760px; margin:0 auto;}
+  section{display:none; animation:fade .35s ease;}
+  section.on{display:block;}
+  @keyframes fade{from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:none;}}
+
+  .sechead{display:flex; align-items:baseline; gap:10px; margin:16px 2px 12px;}
+  .sechead h2{font-size:1.05rem; margin:0; letter-spacing:-.01em;}
+  .sechead .cnt{font-size:.72rem; color:var(--dim); font-weight:600;}
+
+  /* Featured hero */
+  .hero{
+    position:relative; border-radius:var(--radius); overflow:hidden; margin-bottom:16px;
+    border:1px solid var(--line); background:var(--card);
+    min-height:180px; display:flex; flex-direction:column; justify-content:flex-end;
+    padding:20px; isolation:isolate;
+  }
+  .hero::before{content:""; position:absolute; inset:0; z-index:-1;
+    background:var(--herobg, linear-gradient(135deg,#1e3a8a,#0b1e40));}
+  .hero::after{content:""; position:absolute; inset:0; z-index:-1;
+    background:linear-gradient(180deg, rgba(6,9,16,.15) 0%, rgba(6,9,16,.55) 55%, rgba(6,9,16,.9) 100%);}
+  .hero .tag{align-self:flex-start; font-size:.66rem; font-weight:800; letter-spacing:.08em;
+    text-transform:uppercase; padding:5px 10px; border-radius:999px; margin-bottom:auto;
+    background:rgba(255,255,255,.14); backdrop-filter:blur(4px);}
+  .hero h3{margin:14px 0 6px; font-size:1.35rem; line-height:1.2; letter-spacing:-.02em;}
+  .hero p{margin:0; color:#d6ddec; font-size:.9rem; line-height:1.45;}
+  .hero .meta{margin-top:12px; font-size:.72rem; color:#aeb9d2; display:flex; gap:8px; align-items:center; flex-wrap:wrap;}
+
+  /* Cards */
+  .card{
+    display:block; background:var(--card); border:1px solid var(--line);
+    border-radius:var(--radius); padding:16px 16px 15px; margin-bottom:12px;
+    position:relative; overflow:hidden; transition:transform .12s, border-color .2s;
+  }
+  .card:active{transform:scale(.985);}
+  .card .accentbar{position:absolute; left:0; top:0; bottom:0; width:4px; background:var(--accent); opacity:.9;}
+  .card .top{display:flex; align-items:center; gap:8px; margin-bottom:9px; flex-wrap:wrap;}
+  .pill{font-size:.66rem; font-weight:800; letter-spacing:.03em; text-transform:uppercase;
+    padding:4px 9px; border-radius:999px; background:color-mix(in srgb, var(--accent) 16%, transparent);
+    color:color-mix(in srgb, var(--accent) 85%, white); border:1px solid color-mix(in srgb, var(--accent) 30%, transparent);}
+  .time{font-size:.72rem; color:var(--dim); font-weight:600;}
+  .card h4{margin:0 0 6px; font-size:1.02rem; line-height:1.3; letter-spacing:-.01em;}
+  .card p{margin:0; color:var(--muted); font-size:.86rem; line-height:1.5;}
+  .card .rd{margin-top:11px; font-size:.76rem; font-weight:700; color:var(--accent); display:inline-flex; align-items:center; gap:5px;}
+
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+  .chip{background:var(--card2); border:1px solid var(--line); border-radius:14px; padding:13px 14px;}
+  .chip .l{font-size:.7rem; color:var(--dim); font-weight:700; text-transform:uppercase; letter-spacing:.04em;}
+  .chip .v{font-size:1.15rem; font-weight:800; margin-top:4px;}
+
+  /* Market widgets */
+  .tvwrap{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); overflow:hidden; margin-bottom:14px;}
+  .tvwrap .lbl{font-size:.74rem; font-weight:700; color:var(--muted); padding:12px 14px 4px;}
+  .tvinner{padding:0 6px 6px;}
+  .note{font-size:.74rem; color:var(--dim); line-height:1.5; margin:4px 4px 20px; text-align:center;}
+
+  footer{max-width:760px; margin:24px auto 0; padding:18px 20px 30px; text-align:center; color:var(--dim); font-size:.72rem; line-height:1.6; border-top:1px solid var(--line);}
+  footer a{color:var(--muted); text-decoration:underline;}
+
+  @media(min-width:620px){
+    .card:hover{transform:translateY(-2px); border-color:color-mix(in srgb,var(--accent) 40%,var(--line));}
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="brandrow">
+    <div class="brand"><span class="dot" id="dot"></span> Daily&nbsp;Brief</div>
+    <div class="updated">Updated<br><b id="stamp">—</b></div>
+  </div>
+  <nav class="tabs">
+    <button data-k="world" class="active" onclick="go('world')"><span class="ic">🌍</span> Trending</button>
+    <button data-k="auto" onclick="go('auto')"><span class="ic">🚗</span> Auto</button>
+    <button data-k="mkt" onclick="go('mkt')"><span class="ic">📈</span> Markets</button>
+  </nav>
+</header>
+
+<main>
+  <!-- WORLD -->
+  <section id="world" class="on"></section>
+  <!-- AUTO -->
+  <section id="auto"></section>
+  <!-- MARKETS -->
+  <section id="mkt">
+    <div class="sechead"><h2>Markets</h2><span class="cnt">Live · auto-refreshing</span></div>
+    <div class="tvwrap">
+      <div class="lbl">Major Indices &amp; Movers</div>
+      <div class="tvinner"><div id="tv-overview"></div></div>
+    </div>
+    <div class="tvwrap">
+      <div class="lbl">S&amp;P 500 — Intraday</div>
+      <div class="tvinner"><div id="tv-spx"></div></div>
+    </div>
+    <div class="grid2" style="margin-bottom:14px">
+      <div class="tvwrap" style="margin:0"><div class="lbl">Nasdaq 100</div><div class="tvinner"><div id="tv-ndx"></div></div></div>
+      <div class="tvwrap" style="margin:0"><div class="lbl">Crude Oil (WTI)</div><div class="tvinner"><div id="tv-oil"></div></div></div>
+    </div>
+    <div class="sechead" style="margin-top:8px"><h2>What's moving today</h2></div>
+    <div id="mktnews"></div>
+    <p class="note">Charts stream live from TradingView and update on their own — this tab is always current, even between the daily news refresh.</p>
+  </section>
+</main>
+
+<footer>
+  Daily Brief · a personal dashboard that refreshes every morning.<br>
+  News summaries are AI-curated from public sources — tap any card to read the original.
+</footer>
+
+<!-- ============ CONTENT DATA (regenerated daily) ============ -->
+<script>
+const DATA_UPDATED = "Thursday, July 9, 2026 · 7:00 AM CT";
+
+const WORLD = {
+  featured:{
+    tag:"Top Story",
+    title:"Trump declares Iran ceasefire “over” after fresh strikes",
+    summary:"Washington launched a major response after Iranian attacks; Tehran says 14 were killed in U.S. strikes as tensions spike across the region and oil markets react.",
+    source:"CBS News", time:"Live", url:"https://www.cbsnews.com/live-updates/iran-us-war-trump-ceasefire-over-strait-of-hormuz-attacks/",
+    bg:"linear-gradient(135deg,#7f1d1d,#3b0a0a)"
+  },
+  items:[
+    {pill:"Conflict", title:"Ukraine drones hit Russian oil fleet at “industrial scale”", summary:"A sweeping drone offensive struck Russian oil tankers and refineries, prompting Moscow to ban diesel exports and rattling energy supply.", source:"Fox News", time:"2h", url:"https://www.foxnews.com/world/drone-offensive-hits-russian-oil-tankers-refineries-industrial-scale-moscow-bans-diesel-exports"},
+    {pill:"World Cup", title:"France vs Morocco in the 2026 quarterfinal tonight", summary:"Mbappé leads France against a resurgent Morocco side built around Saibari in one of the tournament's marquee knockout clashes.", source:"Al Jazeera", time:"4h", url:"https://www.aljazeera.com/sports/2026/7/9/france-morocco-world-cup-quarterfinal-mbappe-saibari-prediction-start-time-lineups"},
+    {pill:"Economy", title:"Oil climbs as Strait of Hormuz risk returns", summary:"Crude pushed higher as renewed U.S.–Iran tensions revived fears over shipping through the Strait of Hormuz, a chokepoint for global supply.", source:"Yahoo Finance", time:"5h", url:"https://finance.yahoo.com/markets/live/stock-market-today-thursday-july-9-us-strikes-iran-223149196.html"},
+    {pill:"U.S.", title:"Fed speaks this afternoon with markets on edge", summary:"Investors are watching for the central bank's read on inflation and rates against a backdrop of geopolitical risk and record equity highs.", source:"Bucks Times", time:"6h", url:"https://lowerbuckstimes.com/2026/07/09/markets-today-sp500-dow-nasdaq-russell/"},
+    {pill:"Briefing", title:"Your full headline rundown for July 9", summary:"A roundup of the day's top U.S. and world stories in one place.", source:"Democracy Now", time:"7h", url:"https://www.democracynow.org/2026/7/9/headlines"}
+  ]
+};
+
+const AUTO = {
+  featured:{
+    tag:"Industry",
+    title:"Tariffs gut automaker profits as car prices set to climb",
+    summary:"U.S. tariffs wiped out Toyota's entire North America profit for the fiscal year and are squeezing margins across the industry, with new-vehicle prices expected to rise as automakers pass costs to buyers.",
+    source:"WardsAuto", time:"Recent", url:"https://www.wardsauto.com/news/us-tariffs-erase-all-of-toyotas-north-america-profits-in-fy2026/819825/",
+    bg:"linear-gradient(135deg,#7c2d12,#3a1206)"
+  },
+  items:[
+    {pill:"Sales", title:"GM tops Q2 as hybrids power a mixed market", summary:"Automakers posted mixed second-quarter U.S. results, with hybrid demand driving the market. GM led on volume while several rivals lagged and Nissan logged 16 straight months of growth.", source:"CNBC", time:"Q2", url:"https://www.cnbc.com/2026/07/01/q2-auto-sales-gm-stellantis-toyota-hyundai.html"},
+    {pill:"Trucks", title:"Ram closes on Silverado as Ford and GM trucks slide", summary:"The full-size pickup war intensified — Ram kept gaining share through Q2 while Ford and GM full-size sales fell and Toyota's Tacoma widened its midsize lead.", source:"Pickup Truck Talk", time:"Q2", url:"https://pickuptrucktalk.com/2026/07/2026-q2-truck-sales-ram-keeps-rolling-tacoma-widens-lead-while-ford-and-gm-continue-to-slide/"},
+    {pill:"Tariffs", title:"Trump threatens to raise EU auto tariffs to 25%", summary:"A fresh tariff threat on European-built vehicles added uncertainty for global automakers already navigating shifting trade rules and rising input costs.", source:"Digital Dealer", time:"Recent", url:"https://digitaldealer.com/news/us-tariff-tracker-impact-automaker-response/164521/"},
+    {pill:"Trade", title:"U.S. signals it won't renew USMCA as auto rules loom", summary:"The North American trade pact faces a contentious 2026 renegotiation that could reshape where vehicles and parts are built across the continent.", source:"CBT News", time:"Recent", url:"https://www.cbtnews.com/daily-newscast-july-2-2026"},
+    {pill:"Supply Chain", title:"Plant closures, buildouts and rare-earth risk reshape supply", summary:"The parts pipeline is in flux as factories close and expand at once, with rare-earth dependence flagged as a growing vulnerability for producers.", source:"Elm Analytics", time:"Recent", url:"https://automotive-risk-digest.elmanalytics.com/p/automotive-supply-chain-risk-digest-488-20260626"},
+    {pill:"Global", title:"German automakers hit by tariff squeeze and China slump", summary:"Europe's carmakers are grappling with a profit crisis as U.S. tariffs bite and their sales in China weaken sharply.", source:"Automotive News", time:"Recent", url:"https://www.autonews.com/manufacturing/automakers/ane-german-automakers-q1-2026-takeaways-0507/"},
+    {pill:"EV & AV", title:"EV stocks rally as Tesla and Waymo expand robotaxis", summary:"Electric-vehicle names jumped on delivery and robotaxi momentum — Tesla, Rivian, Lucid and Nio all rose — while the driverless race between Tesla and Waymo accelerated.", source:"24/7 Wall St.", time:"Recent", url:"https://247wallst.com/investing/2026/07/06/tesla-rises-6-on-robotaxi-and-delivery-momentum-rivian-and-lucid-jump-7-nio-gains-5-in-ev-sector-rally/"},
+    {pill:"Outlook", title:"Forecasters split on how rough 2026 gets for autos", summary:"Cox Automotive says the U.S. sales pace held strong through the first half despite economic and policy uncertainty, even as others warn of a bumpier road ahead.", source:"Cox Automotive", time:"H1", url:"https://www.coxautoinc.com/insights/cox-automotive-forecast-june-2026-u-s-auto-sales-forecast/"}
+  ]
+};
+
+const MKTNEWS = [
+  {pill:"Tech", title:"AI chip and tech stocks rally, shrugging off war jitters", summary:"Semiconductors led gains as AI optimism overcame worries about the Iran conflict and the fading ceasefire.", source:"Motley Fool", time:"Today", url:"https://www.fool.com/coverage/stock-market-today/2026/07/09/stock-market-today-july-9-ai-chip-technology-stocks-rally-overcoming-ceasefire-worries/"},
+  {pill:"Indices", title:"Dow holds above 53,000 after record run", summary:"The blue-chip index recently notched its first close above 53,000, with the S&P 500 and Nasdaq riding a wave of AI enthusiasm.", source:"CNBC", time:"This wk", url:"https://www.cnbc.com/2026/07/05/stock-market-today-live-updates.html"},
+  {pill:"Energy", title:"Oil spikes on renewed U.S.–Iran tensions", summary:"Crude jumped as the conflict reignited, pressuring some sectors even as tech powered the broader tape higher.", source:"Yahoo Finance", time:"Today", url:"https://finance.yahoo.com/markets/stocks/live/stock-market-today-wednesday-july-8-dow-sp-nasdaq-fall-oil-rise-230111117.html"},
+  {pill:"Chips", title:"Broadcom leads a sharp semiconductor advance", summary:"A rally in chip names helped push the S&P 500 and Nasdaq sharply higher earlier in the week.", source:"News Tribune", time:"This wk", url:"https://www.newstribune.com/news/2026/jul/07/sp-500-nasdaq-close-sharply-higher-as-broadcom/"}
+];
+</script>
+
+<!-- ============ RENDER ============ -->
+<script>
+const ACCENTS = {world:"var(--world)", auto:"var(--auto)", mkt:"var(--mkt)"};
+
+function heroHTML(f){
+  return `<a class="hero" style="--herobg:${f.bg}" href="${f.url}" target="_blank" rel="noopener">
+    <span class="tag">${f.tag}</span>
+    <h3>${f.title}</h3>
+    <p>${f.summary}</p>
+    <div class="meta"><b>${f.source}</b> · ${f.time} <span style="margin-left:auto">Read →</span></div>
+  </a>`;
+}
+function cardHTML(c){
+  return `<a class="card" href="${c.url}" target="_blank" rel="noopener">
+    <span class="accentbar"></span>
+    <div class="top"><span class="pill">${c.pill}</span><span class="time">${c.source} · ${c.time}</span></div>
+    <h4>${c.title}</h4>
+    <p>${c.summary}</p>
+    <span class="rd">Read the story →</span>
+  </a>`;
+}
+
+function renderNews(elId, data, label){
+  const el = document.getElementById(elId);
+  el.innerHTML =
+    `<div class="sechead"><h2>${label}</h2><span class="cnt">${data.items.length+1} stories</span></div>`
+    + heroHTML(data.featured)
+    + data.items.map(cardHTML).join("");
+}
+renderNews("world", WORLD, "Trending & Global");
+renderNews("auto", AUTO, "Automotive");
+document.getElementById("mktnews").innerHTML = MKTNEWS.map(cardHTML).join("");
+document.getElementById("stamp").textContent = DATA_UPDATED;
+
+// tab switching
+let tvLoaded = false;
+function go(k){
+  document.querySelectorAll('section').forEach(s=>s.classList.toggle('on', s.id===k));
+  document.querySelectorAll('nav.tabs button').forEach(b=>b.classList.toggle('active', b.dataset.k===k));
+  document.documentElement.style.setProperty('--accent', ACCENTS[k]);
+  document.getElementById('dot').style.background = ACCENTS[k];
+  window.scrollTo({top:0, behavior:'smooth'});
+  if(k==='mkt' && !tvLoaded){ loadTV(); tvLoaded=true; }
+}
+
+// TradingView live widgets
+function tvScript(container, cfg, src){
+  const host = document.getElementById(container);
+  const wrap = document.createElement('div'); wrap.className='tradingview-widget-container';
+  const inner = document.createElement('div'); inner.className='tradingview-widget-container__widget';
+  wrap.appendChild(inner);
+  const s = document.createElement('script'); s.type='text/javascript'; s.async=true; s.src=src;
+  s.innerHTML = JSON.stringify(cfg); wrap.appendChild(s); host.appendChild(wrap);
+}
+function loadTV(){
+  tvScript('tv-overview', {
+    colorTheme:"dark", dateRange:"1D", showChart:true, locale:"en", width:"100%", height:400, isTransparent:true,
+    showSymbolLogo:true, showFloatingTooltip:true,
+    tabs:[{title:"Indices", symbols:[
+      {s:"FOREXCOM:SPXUSD", d:"S&P 500"},{s:"FOREXCOM:NSXUSD", d:"Nasdaq 100"},
+      {s:"FOREXCOM:DJI", d:"Dow 30"},{s:"TVC:RUT", d:"Russell 2000"},{s:"TVC:VIX", d:"Volatility"}]},
+    {title:"Tech", symbols:[
+      {s:"NASDAQ:NVDA", d:"Nvidia"},{s:"NASDAQ:AAPL", d:"Apple"},{s:"NASDAQ:TSLA", d:"Tesla"},
+      {s:"NASDAQ:AVGO", d:"Broadcom"},{s:"NASDAQ:MSFT", d:"Microsoft"}]},
+    {title:"Energy", symbols:[
+      {s:"TVC:USOIL", d:"WTI Crude"},{s:"TVC:UKOIL", d:"Brent"},{s:"TVC:GOLD", d:"Gold"}]}]
+  }, "https://s3.tradingview.com/external-embedding/embed-widget-market-overview.js");
+
+  tvScript('tv-spx', {symbol:"FOREXCOM:SPXUSD", width:"100%", height:220, locale:"en",
+    dateRange:"1D", colorTheme:"dark", isTransparent:true, autosize:false, chartOnly:false},
+    "https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js");
+  tvScript('tv-ndx', {symbol:"FOREXCOM:NSXUSD", width:"100%", height:180, locale:"en",
+    dateRange:"1D", colorTheme:"dark", isTransparent:true, chartOnly:false},
+    "https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js");
+  tvScript('tv-oil', {symbol:"TVC:USOIL", width:"100%", height:180, locale:"en",
+    dateRange:"1D", colorTheme:"dark", isTransparent:true, chartOnly:false},
+    "https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js");
+}
+</script>
+</body>
+</html>
